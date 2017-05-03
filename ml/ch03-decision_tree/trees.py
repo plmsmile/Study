@@ -38,13 +38,6 @@ def create_dataset():
     Returns:
         dataset: 创建的数据集
     """
-    #dt = np.dtype([('feat1', 'i1'), ('feat2', 'i1'), ('feat3', 'S20')])
-    # dataset = np.array([(1, 1, 'yes'),
-    #                    (1, 1, 'maybe'),
-    #                    (1, 0, 'no'),
-    #                    (0, 1, 'no'),
-    #                    (0, 1, 'no')],
-    #                   dtype=dt)
     # dataset = np.array([[1, 1, 'yes'],
     #                    [1, 1, 'maybe'],
     #                    [1, 0, 'maybe'],

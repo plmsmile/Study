@@ -38,12 +38,6 @@ def create_dataset():
     Returns:
         dataset: 创建的数据集
     """
-    # dataset = np.array([[1, 1, 'yes'],
-    #                    [1, 1, 'maybe'],
-    #                    [1, 0, 'maybe'],
-    #                    [1, 0, 'no'],
-    #                    [0, 1, 'no']])
-    #labels = ['nosurfacing', 'flipper']
     dataset = np.array([[1, 1, 1],
                         [1, 1, 1],
                         [1, 0, 0],

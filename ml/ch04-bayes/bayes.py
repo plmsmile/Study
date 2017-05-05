@@ -9,6 +9,7 @@
 '''
 
 import numpy as np
+import math
 
 
 def load_post_dataset():
@@ -65,18 +66,73 @@ def train_nb0(train_mat, class_list):
         train_mat: 训练矩阵，文档向量组成的矩阵
         class_list: 每一篇文档对应的分类结果
     Returns:
-        
+        p0_vec: c0中各个word占c0总词汇的概率
+        p1_vec: c1中各个word占c1总词汇的概率
+        p1: 文章是c1的概率
     '''
+    # 文档数目，单词数目
+    doc_num = len(train_mat)
+    word_num = len(train_mat[0])
+    # 两个类别的总单词数量
+    c0_word_count = 2.0
+    c1_word_count = 2.0
+    # 向量累加
+    c0_vec_sum = np.ones(word_num)
+    c1_vec_sum = np.ones(word_num)
+    for i in range(doc_num):
+        if class_list[i] == 0:
+            c0_word_count += sum(train_mat[i])
+            c0_vec_sum += train_mat[i]
+        else:
+            c1_word_count += sum(train_mat[i])
+            c1_vec_sum += train_mat[i]
+    # c1_num = class_list.count(1)
+    c1_num = sum(class_list)
+    p1 = c1_num / float(doc_num)
+    p0_vec = c0_vec_sum / c0_word_count
+    # map(lambda x: math.log(x), p0_vec)
+    p1_vec = c1_vec_sum / c1_word_count
+    # 由于后面做乘法会下溢出，所以取对数做加法
+    for i in range(word_num):
+        p0_vec[i] = math.log(p0_vec[i])
+        p1_vec[i] = math.log(p1_vec[i])
+    return p0_vec, p1_vec, p1
+
+
+def classify_nb(w_vec, p0_vec, p1_vec, p1):
+    ''' 使用朴素贝叶斯分类
+    Args:
+        w_vec: 要测试的向量
+        p0_vec: c0中所有词汇占c0的总词汇的概率
+        p1_vec: c1中所有词汇占c1的总词汇的概率
+        p1: 文章为类型1的概率，即P(c1)
+    '''
+    # P(w|c0)*P(c0) = P(w1|c0)*...*P(wn|c0)*P(c0)
+    # 由于下溢出，所以上文取了对数，来做加法
+    w_p0 = sum(w_vec * p0_vec) + math.log(1 - p1)
+    w_p1 = sum(w_vec * p1_vec) + math.log(p1)
+    if w_p0 > w_p1:
+        return 0
+    return 1
 
 
 def test_bayes():
     ''' 测试函数 '''
     post_list, class_list = load_post_dataset()
     vocab_list = get_vocab_list(post_list)
-    post = post_list[0]
-    post_vec = get_doc_vec(vocab_list, post)
-    print post
-    print post_vec
+    train_mat = []
+    for post in post_list:
+        post_vec = get_doc_vec(vocab_list, post)
+        train_mat.append(post_vec)
+    p0_vec, p1_vec, p1 = train_nb0(train_mat, class_list)
+    doc1 = ['love', 'my', 'dalmation']
+    doc2 = ['stupid', 'garbage']
+    doc1_vec = get_doc_vec(vocab_list, doc1)
+    doc2_vec = get_doc_vec(vocab_list, doc2)
+    doc1_class = classify_nb(doc1_vec, p0_vec, p1_vec, p1)
+    doc2_class = classify_nb(doc2_vec, p0_vec, p1_vec, p1)
+    print doc1, doc1_class
+    print doc2, doc2_class
 
 
 def main():
@@ -85,14 +141,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
-
-
-
-
-
-
-
-
-

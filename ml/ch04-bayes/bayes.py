@@ -3,7 +3,13 @@
 
 '''
 朴素贝叶斯
+
+@author PLM
+@date: 2017-05-05
 '''
+
+import numpy as np
+
 
 def load_post_dataset():
     ''' 创造一些文章数据
@@ -51,6 +57,16 @@ def get_doc_vec(vocab_list, doc):
         else:
             print '词汇表中没有 %s ' % word
     return doc_vec
+
+
+def train_nb0(train_mat, class_list):
+    ''' 朴素贝叶斯训练算法，二分类问题
+    Args:
+        train_mat: 训练矩阵，文档向量组成的矩阵
+        class_list: 每一篇文档对应的分类结果
+    Returns:
+        
+    '''
 
 
 def test_bayes():

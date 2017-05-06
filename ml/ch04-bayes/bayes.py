@@ -41,12 +41,14 @@ def get_vocab_list(post_list):
     return list(vocab_set)
 
 
-def get_doc_vec(vocab_list, doc):
+def get_doc_vec(doc, vocab_list, is_bag = False):
     ''' 获得一篇doc的文档向量
-    词汇表中的单词出现为1，不出现为0
+    词集模型：每个词出现为1，不出现为0。每个词出现1次
+    词袋模型：每个词出现次数，可以多次出现。
     Args:
         vocab_list: 总的词汇表
         doc: 一篇文档，由word组成的list
+        is_bag: 是否是词袋模型，默认为Fasle
     Returns:
         doc_vec: 文档向量，1出现，0未出现
     '''
@@ -54,7 +56,10 @@ def get_doc_vec(vocab_list, doc):
     for word in doc:
         if word in vocab_list:
             idx = vocab_list.index(word)
-            doc_vec[idx] = 1
+            if is_bag == False:         # 词集模型
+                doc_vec[idx] = 1
+            else:
+                doc_vec[idx] += 1       # 词袋模型
         else:
             print '词汇表中没有 %s ' % word
     return doc_vec
@@ -117,18 +122,19 @@ def classify_nb(w_vec, p0_vec, p1_vec, p1):
 
 
 def test_bayes():
-    ''' 测试函数 '''
+    ''' 测试函数，判断doc是否是侮辱性邮件 '''
+    
     post_list, class_list = load_post_dataset()
     vocab_list = get_vocab_list(post_list)
     train_mat = []
     for post in post_list:
-        post_vec = get_doc_vec(vocab_list, post)
+        post_vec = get_doc_vec(post, vocab_list)
         train_mat.append(post_vec)
     p0_vec, p1_vec, p1 = train_nb0(train_mat, class_list)
     doc1 = ['love', 'my', 'dalmation']
     doc2 = ['stupid', 'garbage']
-    doc1_vec = get_doc_vec(vocab_list, doc1)
-    doc2_vec = get_doc_vec(vocab_list, doc2)
+    doc1_vec = get_doc_vec(doc1, vocab_list)
+    doc2_vec = get_doc_vec(doc2, vocab_list)
     doc1_class = classify_nb(doc1_vec, p0_vec, p1_vec, p1)
     doc2_class = classify_nb(doc2_vec, p0_vec, p1_vec, p1)
     print doc1, doc1_class

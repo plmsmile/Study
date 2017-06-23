@@ -9,7 +9,7 @@ get corpus
 
 
 import nltk as nk
-
+from nltk.corpus import wordnet as wn
 
 def test_gutenberg():
     '''gutenberg corpus'''
@@ -107,6 +107,96 @@ def test_cfdist(corpus):
             cond_samples.append((genre, word))
     cfdist = nk.ConditionalFreqDist(cond_samples)
     print cfdist.conditions() 
+    print cfdist[genres[0]]['could']
+
+
+def get_english_vocabs():
+    '''获得英语所有的词汇'''
+    return set(w.lower() for w in nk.corpus.words.words())
+
+
+def unusual_words(text):
+    '''获取text中的unusual words
+    不足：单词的变形也被认为是unusual words
+    Args:
+        text: 一段文本
+    '''
+    text_vocabs = set(w.lower() for w in text if w.isalpha())
+    en_vocabs = get_english_vocabs()
+    unusual = text_vocabs.difference(en_vocabs)
+    return sorted(unusual)
+
+
+def get_useful_words(text):
+    '''获取除stopwords以外的词语'''
+    stop_words = get_stopwords()
+    words = [w for w in text if w not in stop_words]
+    return words
+
+
+def get_text(corpus):
+    '''从corpus中获取一个text'''
+    fileids = corpus.fileids()
+    words = corpus.words(fileids = fileids[0])    
+    return words
+
+
+def get_stopwords():
+    '''停用语料库，如the a 等'''
+    return nk.corpus.stopwords.words('english')
+
+
+def compose_words(alphas):
+    '''使用字母组建单词
+    Args:
+        alphas: 所能使用的字母
+    Returns:
+        words: 所能组成的单词列表
+    '''
+    puzzle_letters = nk.FreqDist(alphas)
+    obligatory = alphas[0]
+    english_vocabs = get_english_vocabs()
+    words = []
+    for w in english_vocabs:
+        if len(w) >= 6 and obligatory in w and nk.FreqDist(w) <= puzzle_letters:
+            words.append(w)
+    return words
+
+
+def get_common_words(language):
+    '''获得一种语言里的常用的词汇
+    Args:
+        language: 语言
+    Returns:
+        words: 该语言的常用词汇
+    '''
+    return nk.corpus.swadesh.words(language)
+
+
+def get_translate_dict(src_lang, dst_lang):
+    '''常用词的词汇翻译
+    Args:
+        src_lang: 源语言
+        dst_lang: 目标语言
+    Returns:
+        translate_dict: 翻译后的dict
+    '''
+    translate_dict = dict(nk.corpus.swadesh.entries([src_lang, dst_lang]))
+    return translate_dict
+
+
+def test_wordnet():
+    '''wordnet'''
+    syn_sets = wn.synsets('love')
+    synset = syn_sets[0]
+    print synset
+    print synset.lemma_names()
+    print wn.synset('love.n.01').lemma_names()
+    print synset.definition()
+    print synset.examples()
+    print wn.synset('car.n.01').lemma_names()
+
+
 
 
 if __name__ == '__main__':
@@ -114,7 +204,14 @@ if __name__ == '__main__':
     # show_corpusinfo(nk.corpus.webtext)
     # test_webtext()
     # test_brown()
-    test_cfdist(nk.corpus.brown)
+    # test_cfdist(nk.corpus.brown)
+    # print unusual_words(get_text(nk.corpus.brown))
+    # text = get_text(nk.corpus.brown)
+    # print len(text), len(get_useful_words(text))
+    # print compose_words('regivvonl')
+    # print len(get_common_words('en'))
 
-
+    #translate_dict = get_translate_dict('en', 'fr')
+    #print len(translate_dict)
+    test_wordnet()
 

@@ -29,15 +29,15 @@ def main(_):
     }
 
     biases = {
-        'hidden': tf.Variable(tf.random_normal([N_HIDDEN], name = 'b_hidden'),
+        'hidden': tf.Variable(tf.random_normal([N_HIDDEN], name = 'b_hidden')),
         'out': tf.Variable(tf.random_normal([N_OUTPUT]), name = "b_out")
     }
 
     def KLD(p, q):
         '''散度'''
-        invrho = tf.subtract(tf.contant(1.), p)
+        invrho = tf.subtract(tf.constant(1.), p)
         invrhohat = tf.subtract(tf.constant(1.), q)
-        t1 = tf.mutliply(p, tf.log(tf.div(p, q)))
+        t1 = tf.multiply(p, tf.log(tf.div(p, q)))
         t2 = tf.multiply(invrho, tf.log(tf.div(invrho, invrhohat)))
         addrho = tf.add(t1, t2)
         return tf.reduce_sum(addrho)
@@ -51,11 +51,11 @@ def main(_):
         hidden_res = tf.sigmoid(hidden_tmp)
 
     with tf.name_scope('output_layer'):
-        out_tmp = tf.add(tf.matmul(hidden_res, weights['out']), baises['out'])
+        out_tmp = tf.add(tf.matmul(hidden_res, weights['out']), biases['out'])
         out_res = tf.nn.softmax(out_tmp)
 
     with tf.name_scope('loss'):
-        cost_j = rf.reduce_sum(tf.pow(tf.subtract(out, x), 2))
+        cost_j = tf.reduce_sum(tf.pow(tf.subtract(out_res, x), 2))
 
     with tf.name_scope('cost_sparse'):
         # kl divergence
@@ -66,7 +66,7 @@ def main(_):
         t = tf.add(tf.nn.l2_loss(weights['hidden']), tf.nn.l2_loss(weights['out']))
         cost_reg = tf.multiply(LAMBDA, t)
 
-    with tf.name_scop('cost'):
+    with tf.name_scope('cost'):
         cost = tf.add(tf.add(cost_j, cost_reg), cost_sparse)
 
 
@@ -81,10 +81,12 @@ def main(_):
         for i in range(1000):
             sess.run(optimizer, {x:input_data})
             if i % 100 == 0:
-                tmp = sess.run(out, {x:input_data})
-                print i, sess.run(diff(tmp, input_data))
+                fetch = [out_res, cost_sparse]
+                tmp = sess.run(fetch, {x:input_data})
+                print tmp
+                print i, sess.run(diff(tmp[0], input_data))
 
-        tmp = sess.run(out, {x:input_data})
+        tmp = sess.run(out_res, {x:input_data})
         print tmp
 
 

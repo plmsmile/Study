@@ -21,7 +21,7 @@ def weight_variable(shape):
     Returns:
         Variable with initial 参数
     '''
-    # 截断的正态分布，避免0梯度，方差为0.1
+    # 截断的正态分布，避免0梯度，标准差为0.1
     initial = tf.truncated_normal(shape, stddev=0.1)
     return tf.Variable(initial)
 
@@ -35,7 +35,6 @@ def bias_variable(shape):
     '''
     initial = tf.constant(0.1, shape=shape)
     return tf.Variable(initial)
-
 
 
 def mlp_main():
@@ -63,6 +62,7 @@ def mlp_main():
     # 使用relu作为激活函数，解决梯度弥散问题，适合深层神经网络
     # 1. 1-4%神经元被激活 2. 多层反向传播梯度不会减少 3. 单侧抑制
     h1 = tf.nn.relu(h1_v)
+    # 实质上创造了很多新的随机样本，防止过拟合
     h1_drop = tf.nn.dropout(h1, keep_prob)
     
     # 输出层
@@ -72,6 +72,7 @@ def mlp_main():
 
     ## 2. 定义loss(交叉熵)选择优化器优化
     y_ = tf.placeholder(tf.float32, [None, 10]) # 真实的y
+    # axis=0 列，axi=1 行
     # cross_entropy = tf.reduce_mean(-tf.reduce_sum( y_ * tf.log(y), axis=1))
     all_cross_entropy = tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y)
     cross_entropy = tf.reduce_mean(all_cross_entropy)

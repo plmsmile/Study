@@ -65,7 +65,7 @@ class WordUtil(object):
         Args:
             words: 单词列表
         Returns:
-            word_code: 所有word的编码，top的单词：数量；其余的：0
+            word_code: 所有word的编码，top的单词：某个顺序；其余的：0
             topword_id: topword-id
             id_topword: id-word
             topcount: 包含所有word的一个Counter对象
@@ -77,9 +77,10 @@ class WordUtil(object):
             collections.Counter(words).most_common(
                 self.__vocab_size - 1))
         topword_id = {}
+        # topword: 1-vocab_size编码
         for word, _ in topcount:
             topword_id[word] = len(topword_id)
-        # 构建单词的编码。top单词：出现次数；其余单词：0
+        # 构建单词的编码。top单词：某个顺序；其余单词：0
         word_code = []
         unk_count = 0
         for w in words:
@@ -248,13 +249,12 @@ def go_model():
 
 if __name__ == '__main__':
     #filename = maybe_download('text8.zip', 31344016)
-    #vocab_size = 50000
-    #wu = WordUtil(vocab_size)
-    #words = wu.read_data('text8.zip')
-    #word_code, topword_id, id_topword, topcount= wu.build_dataset(words)
-    #batch, labels = wu.generate_batch(8, 2, 1, word_code)
-    # print type(topword_id), type(id_topword)
-    # for i in range(8):
-    # print batch[i], labels[i][0], id_topword[batch[i]],
-    # id_topword[labels[i][0]]
-    go_model()
+    vocab_size = 50000
+    wu = WordUtil(vocab_size)
+    words = wu.read_data('text8.zip')
+    word_code, topword_id, id_topword, topcount= wu.build_dataset(words)
+    batch, labels = wu.generate_batch(8, 2, 1, word_code)
+    print type(topword_id), type(id_topword)
+    for i in range(8):
+        print batch[i], labels[i][0], id_topword[batch[i]], id_topword[labels[i][0]]
+    #go_model()
